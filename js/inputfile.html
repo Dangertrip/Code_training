@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- This HTML is to test how to justify a file input tag whether has been designated file or not.-->
+	<title>Inputfile</title>
+</head>
+<body>
+<input type="file" id="test"/>
+</body>
+<script>
+	var a = document.getElementById("test");
+	alert(a.value);
+	a.onchange=function(){
+		if(this.value===""){
+			alert('empty');
+		} else {
+			alert(this.value);
+		}
+	}
+</script>
+</html>

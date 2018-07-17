@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>GsmPlot</title>
+	<script src="index.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css"/>
+	<style type="text/css">
+		#main{background-color:#f8f8ff}
+		h4{text-align:justify}
+		.spinner {
+			width: 20px;
+			height: 20px;
+			background-color: #67CF22;				   
+			margin: 5px;
+			-webkit-animation: rotateplane 1.2s infinite ease-in-out;
+			animation: rotateplane 1.2s infinite ease-in-out;
+		}
+		 
+		@-webkit-keyframes rotateplane {
+			0% { -webkit-transform: perspective(120px) }
+			50% { -webkit-transform: perspective(120px) rotateY(180deg) }
+			100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+		}
+		 
+		@keyframes rotateplane {
+			0% {
+				transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+				-webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg)
+			} 
+			50% {
+				transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+				-webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg)
+			} 
+			100% {
+				transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+				-webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+			}
+		}
+	</style>
+</head>
+<body>
+	<!--bar-->
+	<div class="col container">
+		<div class="float-left"><h2>GsmPlot</h2></div>
+	</div>
+	<div class="col container">
+		<div class="float-right"><img height="200px" width="200px" src="/temp/logo.png"/></div> 
+	</div>
+	<!-- main content
+	<div id="sidebar_left" class="container">
+		<div class="row">
+			<div class="col-md-3 col-lg-3">
+
+			</div>
+		</div>
+	</div>-->
+	<div  class="container">
+	<div class="row">
+	<div id="main" class="col-md-12 col-lg-12"
+	<p><h3>GsmPlot: a web server to visualize epigenome data in NCBI.</h3></p>
+	<form role="form" name="submit_form" enctype="multipart/form-data" method=post action="{% url 'GsmPlot:info' %}" onsubmit="return validate_form();">
+	{% csrf_token %}
+		<div class="form-group">
+			<label id="genome">Background genome:</label><br/>
+			<span>hg19:&nbsp;&nbsp;<input type="radio" value="hg19" name="genome" id="genome_default" onclick="switchgenome(this.value)"/></span>&nbsp;&nbsp;&nbsp;&nbsp;
+		<!--	<span>hg38:&nbsp;&nbsp;<input type="radio" value="hg38" name="genome" onclick="switchgenome(this.value)"/></span>&nbsp;&nbsp;&nbsp;&nbsp;-->
+		<!--	<span>mm9:&nbsp;&nbsp;<input type="radio" value="mm9" name="genome" onclick="switchgenome(this.value)"/></span>&nbsp;&nbsp;&nbsp;&nbsp;-->
+			<span>mm10:&nbsp;&nbsp;<input type="radio" value="mm10" name="genome" onclick="switchgenome(this.value)"/></span>
+	<!--		<ul>
+				<li><span>hg19:&nbsp;&nbsp;<input type="radio" value="hg19" name="genome" /></span></li>
+				<li><span>hg38:&nbsp;&nbsp;<input type="radio" value="hg38" name="genome" /></span></li>
+				<li><span>mm9:&nbsp;&nbsp;<input type="radio" value="mm9" name="genome" /></span></li>
+				<li><span>mm10:&nbsp;&nbsp;<input type="radio" value="mm10" name="genome" /></span></li>
+			</ul>-->
+		</div>
+		<div class="form-group">
+			<label>Data information:</label>
+			<ul>
+				<li>
+					<label>
+						<label for="GSM">GSM ID:</label>
+						<textarea class="form-control" name="GSM" id="GSM" rows="6" cols="20"></textarea>
+						<!-- Add examples here-->
+					</label>
+					<!--<div class="">
+						<p>Type in GSM code such as: </p>
+						<p>&nbsp;GSM123</p>
+						<p>&nbsp;GSM456</p>
+						<p>Each line have only one GSM code.</p>
+						</div>-->
+				</li>
+				<li>
+					<label>
+						<span>BigWig file: &nbsp;&nbsp;<input type="file" id="bwfile" name="bwfile"></span>
+					</label>
+				</li>
+			</ul>
+		</div>
+		<!-- Here's the block for input background bed file -->
+		<div class="form-group">
+			<label id="bgoption">Interested regions</label>
+			<ul>
+				<li>
+					<label>
+						<input type="radio" id="bguploadbed" name="bgChoice" value="file" onclick="switchBg(this.value)" />
+						<span>BED file: &nbsp;&nbsp;<input type="file" id="bgfile" name="bgfile"></span>
+					</label>
+				</li>
+				<li>
+					<label>
+						<input type="radio" id="bgmanualgene" name="bgChoice" value="data" onclick="switchBg(this.value)" />
+						<span>Gene name: </span>
+						<textarea id="bgdata" name="bgdata" rows="5"></textarea>
+					</label>
+				</li>
+				<li>
+					<label>
+						<input type="radio" id="bgprebed" name="bgChoice"  value="preset" onclick="switchBg(this.value)" />
+						<span>Anotated region:</span>
+					</label>
+					<br/>
+					<label for="cgi">CpG island:&nbsp;</label>
+					<input type="radio" id="cgi" name="bgpreset" value="cgi" />&nbsp;&nbsp;
+					<label for="prom">Promoter:&nbsp;</label>
+					<input type="radio" id="prom" name="bgpreset" value="prom" />&nbsp;&nbsp;
+					<label for="exon">Exon:&nbsp;</label>
+					<input type="radio" id="exon" name="bgpreset" value="exon" />&nbsp;&nbsp;
+					<label for="intron">Intron:&nbsp;</label>
+					<input type="radio" id="intron" name="bgpreset" value="intron"/>&nbsp;&nbsp;
+					<label for="3'UTR">3'UTR:&nbsp;</label>
+					<input type="radio" id="3utr" name="bgpreset" value="3utr"/>&nbsp;&nbsp;
+					<label for="5'UTR">5'UTR:&nbsp;</label>
+					<input type="radio" id="5utr" name="bgpreset" value="5utr"/>&nbsp;&nbsp;
+					<label for="genebody">genebody:&nbsp;</label>
+					<input type="radio" id="genebody" name="bgpreset" value="genebody"/>
+				</li>
+		</div>
+		<div class="form-group">
+			<label id="bgmeth">DNA Methylation information:</label>
+			<ul>
+				<li><span>Human ESC(GSE80911):&nbsp;&nbsp;<input type="checkbox" id="meth1" name="meth1" /></span></li>
+				<li><span>Mouse ESC(GSE28533):&nbsp;&nbsp;<input type="checkbox" id="meth2" name="meth2" /></span></li>
+			</ul>
+		</div>
+		<div class="form-group">
+			<label id="bghmc">DNA Hydroxymethylation information:</label>
+			<ul>
+				<li><span>Human ESC(GSE16256):&nbsp;&nbsp;<input type="checkbox" id="hmc1" name="hmc1" /></span></li>
+				<li><span>Mouse ESC(GSE16256):&nbsp;&nbsp;<input type="checkbox" id="hmc2" name="hmc2" /></span></li>
+			</ul>
+		</div>
+		<!-- Here's the plot setting-->
+		<hr></hr>
+		<div class="form-group">
+			<p class="help-block">Plot setting:</p>
+			<label for="before">Upstream region length(bp):</label>
+		 	<input name="before" id="before" type="text" value="1000"/><br/>
+			<label for="after">Downstream region length(bp):</label>
+			<input name="after" id="after" type="text" value="1000"/><br/>
+			<label for="scale">Scale target region to(bp):</label>
+			<input name="scale" id="scale" type="text" value="1000"/><br/>
+			<label for="binsize">Bin size for plotting(factor of scaled length and upstream/downstream length):</label>
+			<input name="binsize" id="binsize" type="text" value="50"/><br/>
+			<!--<label for="bed">Upload bed file to fix target regions:</label>
+			<input type="file" name="bed" id="bed"><br/>-->
+			<input class="btn btn-default" type="submit" id="Process">
+		</div>
+	</form>
+	<hr></hr>
+	<p>GsmPlot is a web service to automatically download, analyze and visualize epigenetics data(ChIP-Seq, ATAC-Seq, Bis-Seq),public from NCBI or private from you.</p>
+	<p><strong>Motivation:</strong> Epigenetic regulation is essential for cell differentiation, development and diseases. Many high-throughput sequencing technologies have been widely used to study the epigenetic modifications such as histone modification, transcription factor binding sites, DNA methylation or hydroxylation, chromatin accessibility , and etc. A large scale of epigenetic data for various species, cell types, diseases and experimental conditions are stored in NCBI Gene Expression Omnibus (GEO). This public data repository is utilized by all the investigators worldwide. However, for researchers who do not specialize in bioinformatics skills, it is very hard to reanalyze and utilize such publicly available data.</p>
+	<p><strong>Results:</strong> GsmPlot web server allows quick visualization and efficient exploration of any NCBI epigenetic data in any genomic region without need of bioinformatics skills or special computing resources. GsmPlot can simply accept GSM ID to automatically download NCBI data or can accept user’s private bigwig files as input to plot the interested data on promoters, exons or any other defined genome locations and generate UCSC visualization tracks. By linking public data repository and private data, GsmPlot can spark  data driven ideas and hence pro-mote the epigenetic research.</p>
+	</div>
+	</div>
+	</div>
+
+
+<!-- form over  -->
+
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.bundle.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script>
+
+		$(document).ready(function(){
+		
+			document.getElementById("genome_default").click();
+			//document.getElementById("bwgsm").click();
+			document.getElementById("bgprebed").click();
+			document.getElementById("cgi").click();
+			put_placeholder('GSM','GSM1273669\nGSM1273670');
+			put_placeholder('bgdata','P53\nKRAS');
+			//window.addEventListener("beforeunload",destroy_session)
+		})
+	</script>
+</body>
+</html>
+
